@@ -1,0 +1,635 @@
+<div class="content-wrap py-4">
+  <div class="container-fluid">
+    <div class="row dashboard-cards-wrap">
+      <div class="col-md-12 col-lg-6 col-xl-4 mb-3">
+        <div class="dashboard-card beneficiaries-info">
+          <h3 class="inner-title dc-card-title">Beneficiaries Details</h3>
+          <ul class="dc-list d-flex align-items-center justify-content-between px-4 flex-wrap">
+            <li>
+              <h3 class="dc-title color-blue mb-0">130</h3>
+              <p class="dc-value">No Of Beneficiaries</p>
+            </li>
+
+            <li>
+              <h3 class="dc-title color-green mb-0">130</h3>
+              <p class="dc-value">Booked Slots</p>
+            </li>
+
+            <li>
+              <h3 class="dc-title color-red mb-0">130</h3>
+              <p class="dc-value">Didn't Show Up</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-12 col-lg-6 col-xl-4 mb-3">
+        <div class="dashboard-card beneficiaries-info">
+          <h3 class="inner-title dc-card-title">Risk Zone Wise Beneficiaries Details</h3>
+          <ul class="dc-list d-flex align-items-center justify-content-between px-4 flex-wrap">
+            <li>
+              <h3 class="dc-title color-red mb-0">20</h3>
+              <p class="dc-value">High Risk</p>
+            </li>
+
+            <li>
+              <h3 class="dc-title color-orange mb-0">50</h3>
+              <p class="dc-value">Sub Optimal</p>
+            </li>
+
+            <li>
+              <h3 class="dc-title color-green mb-0">60</h3>
+              <p class="dc-value">Optimal</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card latest-beneficiaries">
+      <div class="card-title-wrap d-flex align-items-center justify-content-between mb-3">
+        <h3 class="inner-title dc-card-title mb-0">Beneficiary List</h3>
+        <div class="d-flex align-items-center gab-5">
+          <!-- <tvsm-select
+            [options]="options"
+            (selectionChange)="onSelectChange($event)"
+            class="custom-select me-3"
+          >
+          </tvsm-select> -->
+
+          <!-- Template definitions for custom icons -->
+          <ng-template #svgIconTemplate>
+            <app-custom-svg-icon></app-custom-svg-icon>
+          </ng-template>
+
+          <ng-template #arrowIconTemplate>
+            <app-custom-arrow-icon></app-custom-arrow-icon>
+          </ng-template>
+
+          <ng-template #selectIconTemplate>
+            <app-custom-select-icon></app-custom-select-icon>
+          </ng-template>
+
+          <!-- Status Filter -->
+          <tvsm-dropdown
+            [options]="options"
+            [(ngModel)]="selectedOption"
+            placeholder="All Status"
+            [searchable]="true"
+            [multiple]="true"
+            [showCheckboxes]="true"
+            [filterIcon]="true"
+            [filterIconTemplate]="selectIconTemplate"
+            [searchIconTemplate]="svgIconTemplate"
+            [arrowIconTemplate]="arrowIconTemplate"
+            customClass="template-icons-style"
+            (selectionChange)="onSelectChange($event)"
+            class="me-3"
+          ></tvsm-dropdown>
+
+          <ng-template #svgSearchIcon>
+            <span class="custom-search-icon">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </span>
+          </ng-template>
+          <tvsm-searchbar
+            placeholder="Search"
+            [debounce]="300"
+            (onSearch)="onDebouncedSearch($event)"
+            [searchIcon]="svgSearchIcon"
+          >
+          </tvsm-searchbar>
+        </div>
+      </div>
+
+      <div class="table-responsive vh-100">
+        <tvsm-datatable [columns]="columns" [rows]="paginatedRows" [striped]="true">
+        </tvsm-datatable>
+        <ng-template #statusTemplate let-value let-row="row">
+          @if (row.flags.length > 0) {
+            <div
+              class="flag-info d-flex align-items-center gap-2"
+              (mouseenter)="onFlagMouseEnter(row.id)"
+              (mouseleave)="onFlagMouseLeave(row.id)"
+            >
+              <span
+                ><img src="assets/images/flag-icon.svg" alt="flag-icon" class="red-flag"
+              /></span>
+              <span class="flag-count">{{ row.flags.length }}</span>
+              <div
+                class="beneficiaries-flags-wrap"
+                [class.visible]="isTooltipVisible(row.id)"
+                [ngStyle]="getTooltipStyle(row.id)"
+              >
+                <div class="bfw-content d-grid align-items-center justify-content-between gap-2">
+                  @for (flag of row.flags; track flag.id) {
+                    <div class="beneficiaries-flag-tooltip h-100">
+                      @if (flag.dueDate) {
+                        <h4 class="flag-tooltip-title">
+                          <span>{{ $index + 1 }}</span>
+                          Due Date: {{ formatDueDate(flag.dueDate) }}
+                        </h4>
+                      }
+                      <div class="flag-tooltip-content">
+                        @if (flag.flagType === 'CRITICAL') {
+                          <p>
+                            {{ flag.description }}
+                          </p>
+                        } @else if (flag.vitalName) {
+                          <!-- For critical flags with null vitalName, only show description if available -->
+                          @if (flag.description) {
+                            <p>{{ flag.vitalName + ' - ' + flag.description }}</p>
+                          }
+                        } @else {
+                          <p>Vital flag - Action required</p>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </ng-template>
+
+        <ng-template #actionTemplate let-row="row">
+          <button class="btn">
+            <img src="assets/images/actions-view-icon.svg" alt="Action View" />
+          </button>
+        </ng-template>
+        <tvsm-pagination
+          variant="detailed"
+          [currentPage]="currentPage"
+          [totalItems]="totalItems"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        >
+        </tvsm-pagination>
+      </div>
+    </div>
+  </div>
+</div>
+
+TS:
+import { Component, ViewChild, TemplateRef, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import {
+  SelectOption,
+  SearchbarComponent,
+  DataTableComponent,
+  DataTableColumn,
+  PaginationComponent,
+  DropdownComponent,
+} from '@Digital-mfg/mhi-ui-components';
+import { LogService } from '@/core/services/log.service';
+
+import {
+  CustomSvgIconComponent,
+  CustomArrowIconComponent,
+  CustomSelectIconComponent,
+} from '@/app/shared/custom-icons/custom-icons.component';
+
+import { Router } from '@angular/router';
+import { AdminService } from '@/app/core/services/admin.service';
+import { Employee, EmployeeFilters, EmployeeFlag } from '@/app/core/models/employee.models';
+import { formatFlagDueDate } from '@/app/core/utils/flag.utils';
+
+@Component({
+  selector: 'app-employee',
+  standalone: true,
+  imports: [
+    CommonModule,
+    SearchbarComponent,
+    DataTableComponent,
+    PaginationComponent,
+    FormsModule,
+    DropdownComponent,
+    CustomSvgIconComponent,
+    CustomArrowIconComponent,
+    CustomSelectIconComponent,
+  ],
+  templateUrl: './admin-dashboard.component.html',
+  styleUrls: ['./admin-dashboard.component.scss'],
+})
+export class AdminComponent implements AfterViewInit {
+  @ViewChild('statusTemplate', { static: true }) statusTemplate!: TemplateRef<unknown>;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate!: TemplateRef<unknown>;
+  private logger: ReturnType<LogService['createContextLogger']>;
+
+  // Track which tooltip is currently visible and its position
+  visibleTooltip: number | null = null;
+  tooltipStyles: { [key: number]: any } = {};
+
+  options: SelectOption[] = [
+    { value: '', label: 'All Status' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+  ];
+  selectedOption: string | string[] = '';
+  preSelectedValue: string = 'option2'; // Pre-select Option 2
+  searchQuery = '';
+
+  // Search state
+  lastQuery = '';
+  lastDebounced = '';
+  lastClearable = '';
+  initialValue = 'Initial search value';
+
+  paginatedRows: any = [];
+
+  columns: DataTableColumn[] = [];
+
+  currentPage = 1;
+  itemsPerPage = 10; // Show 3 rows per page
+  totalPages = 1;
+  paginationPages: number[] = [];
+  pageSize = 10;
+  totalItems = 10;
+
+  constructor(
+    private logService: LogService,
+    private router: Router,
+    private adminService: AdminService,
+  ) {
+    this.logger = this.logService.createContextLogger('AdminDashboardComponent');
+    // Initialize pagination
+    this.totalPages = Math.ceil(this.paginatedRows.length / this.itemsPerPage);
+    this.paginationPages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  ngOnInit() {
+    // Pagination DataTable
+    this.columns = [
+      { id: 'id', label: 'SI No', width: '60px' },
+      { id: 'beneficiary_id', label: 'Beneficiary Id', sortable: true },
+      { id: 'name', label: 'Beneficiary Name', sortable: true },
+      { id: 'department', label: 'Department', sortable: true },
+      { id: 'mhi_score', label: 'MHI Score', sortable: true },
+      { id: 'risk_level', label: 'Risk Level', sortable: true },
+      { id: 'updated_on', label: 'Last Updated on', sortable: true },
+      {
+        id: 'flagged',
+        label: 'Flagged',
+        template: this.statusTemplate,
+        // className: (row: Record<string, unknown>) =>
+        //   String(row['status']) === 'Active' ? 'bg-light-green' : 'bg-light-red',
+        style: (row: Record<string, unknown>) => ({
+          cursor: 'pointer',
+          color: String(row['status']) === 'Active' ? 'green' : 'red',
+        }),
+        // onClick: (row: Record<string, unknown>, value: unknown) =>
+        //   window.alert(`${String(row['name'])} is ${String(value)}`),
+        sortable: true,
+      },
+      {
+        id: 'actions',
+        label: 'Actions',
+        width: '100px',
+        template: this.actionTemplate,
+        onClick: (row: Record<string, unknown>) =>
+          this.router.navigate(['/admin/employee-details', row['id']]),
+      },
+    ];
+    // Load employees (admin endpoint)
+    this.loadEmployees();
+  }
+
+  loadEmployees() {
+    let filters: EmployeeFilters = {};
+    if (this.searchQuery) {
+      filters.search = this.searchQuery.trim();
+    }
+
+    if (this.selectedOption) {
+      if (Array.isArray(this.selectedOption)) {
+        const validateStatus = this.selectedOption.filter((s) => s != '');
+
+        if (validateStatus.length === 1) {
+          filters.isActive = validateStatus[0] === 'active';
+        } else if (validateStatus.length > 1) {
+          filters.isActive = undefined;
+        }
+      } else if (typeof this.selectedOption === 'string') {
+        if (this.selectedOption === 'active' || this.selectedOption === 'inactive') {
+          filters.isActive = this.selectedOption === 'active';
+        } else {
+          filters.isActive = undefined;
+        }
+      }
+    }
+    this.adminService.getEmployees(filters).subscribe({
+      next: (res) => {
+        const employees: Employee[] = res.data || [];
+        // Map to table rows without changing HTML
+        this.paginatedRows = employees.map((e) => {
+          const flags = this.getAllFlags(e.flagsAsEmployee || []) || [];
+          return {
+            id: e.id,
+            beneficiary_id: `B${String(e.id).padStart(3, '0')}`,
+            name: e.name,
+            department: e.departments?.[0]?.department?.name || '-',
+            mhi_score: Number(e.employeeDetails?.complianceScore ?? 0),
+            risk_level: '-',
+            updated_on: new Date(e.updatedDate).toLocaleDateString('en-GB'),
+            flagged: flags.length > 0 ? 'Yes' : 'No',
+            flags: flags, // Store the latest flag for template
+            actions: 'View',
+          };
+        });
+        this.totalItems = this.paginatedRows.length;
+        this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage) || 1;
+        this.paginationPages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+      },
+      error: () => {
+        this.logger.error('Failed to load employees');
+      },
+    });
+  }
+
+  /**
+   * Get the latest active flag for an employee
+   * Returns the most recent active flag
+   */
+  getAllFlags(flags: EmployeeFlag[]): EmployeeFlag[] | undefined {
+    if (!flags || flags.length === 0) return undefined;
+
+    // Filter only active flags with active status
+    const activeFlags = flags.filter((f) => f.isActive && f.status === 'ACTIVE');
+
+    if (activeFlags.length === 0) return undefined;
+
+    // Sort by createdDate descending and return the latest one
+    return activeFlags.sort((a, b) => {
+      const dateA = new Date(a.createdDate).getTime();
+      const dateB = new Date(b.createdDate).getTime();
+      return dateB - dateA;
+    });
+  }
+
+  formatDueDate(dateString: string | null | undefined): string {
+    return formatFlagDueDate(dateString);
+  }
+
+  ngAfterViewInit(): void {
+    // Recalculate positions on window resize
+    window.addEventListener('resize', () => {
+      if (this.visibleTooltip !== null) {
+        this.calculateTooltipPosition(this.visibleTooltip);
+      }
+    });
+  }
+
+  onFlagMouseEnter(employeeId: number): void {
+    this.visibleTooltip = employeeId;
+    setTimeout(() => {
+      this.calculateTooltipPosition(employeeId);
+    }, 0);
+  }
+
+  onFlagMouseLeave(employeeId: number): void {
+    this.visibleTooltip = null;
+    this.tooltipStyles[employeeId] = {};
+  }
+
+  isTooltipVisible(employeeId: number): boolean {
+    return this.visibleTooltip === employeeId;
+  }
+
+  getTooltipStyle(employeeId: number): any {
+    return this.tooltipStyles[employeeId] || {};
+  }
+
+  private calculateTooltipPosition(employeeId: number): void {
+    setTimeout(() => {
+      // Find the flag-info element for this employee row
+      let targetFlagInfo: HTMLElement | null = null;
+
+      // Find the flag-info element in the row that matches this employee ID
+      // Use a data attribute or find by employee ID in the row
+      const allFlagInfos = document.querySelectorAll('.flag-info');
+      for (let i = 0; i < allFlagInfos.length; i++) {
+        const flagInfo = allFlagInfos[i] as HTMLElement;
+        // Find the parent row
+        const row = flagInfo.closest('tr') as HTMLElement | null;
+        if (row) {
+          // Try to find employee ID in the row - check if any cell contains the ID
+          const cells = row.querySelectorAll('td');
+          let foundEmployeeId = false;
+
+          // Check cells for employee ID match
+          for (let j = 0; j < cells.length; j++) {
+            // Check if this cell's row data matches
+            const rowIndex = Array.from(row.parentElement?.children || []).indexOf(row);
+            if (rowIndex >= 0 && this.paginatedRows[rowIndex]?.id === employeeId) {
+              foundEmployeeId = true;
+              break;
+            }
+          }
+
+          if (foundEmployeeId) {
+            targetFlagInfo = flagInfo;
+            break;
+          }
+        }
+      }
+
+      if (!targetFlagInfo) return;
+
+      const tooltipElement = targetFlagInfo.querySelector(
+        '.beneficiaries-flags-wrap',
+      ) as HTMLElement | null;
+      if (!tooltipElement) return;
+
+      // Temporarily make tooltip visible to measure dimensions
+      const wasVisible = tooltipElement.classList.contains('visible');
+      if (!wasVisible) {
+        tooltipElement.style.display = 'block';
+        tooltipElement.style.visibility = 'hidden';
+        tooltipElement.style.opacity = '0';
+      }
+
+      const flagInfoRect = targetFlagInfo.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const viewportPadding = 10;
+
+      // Get table container bounds to account for table scroll/pagination
+      const tableContainer = targetFlagInfo.closest('.table-responsive') as HTMLElement | null;
+      const tableContainerRect = tableContainer?.getBoundingClientRect();
+      const containerRight = tableContainerRect ? tableContainerRect.right : viewportWidth;
+      const containerBottom = tableContainerRect ? tableContainerRect.bottom : viewportHeight;
+
+      // Get actual tooltip dimensions
+      const tooltipWidth = tooltipElement.offsetWidth || 350;
+      const tooltipHeight = tooltipElement.offsetHeight || 150;
+
+      // Restore original state if we temporarily made it visible
+      if (!wasVisible) {
+        tooltipElement.style.display = '';
+        tooltipElement.style.visibility = '';
+        tooltipElement.style.opacity = '';
+      }
+
+      let left: number | undefined = 0;
+      let top = '100%';
+      let transform = '';
+      let right: string | undefined = undefined;
+      let bottom = 'auto';
+
+      // Check horizontal positioning
+      // Use container bounds or viewport, whichever is smaller
+      const effectiveRightBound = Math.min(containerRight, viewportWidth) - viewportPadding;
+      const spaceLeft = flagInfoRect.left;
+      const tooltipRightEdge = flagInfoRect.right + tooltipWidth;
+
+      if (tooltipRightEdge <= effectiveRightBound) {
+        // Enough space to the right within container/viewport
+        left = 0;
+        right = undefined;
+      } else if (spaceLeft >= tooltipWidth + viewportPadding) {
+        // Not enough space to the right, position to the left
+        left = flagInfoRect.width - tooltipWidth;
+        right = undefined;
+        if (flagInfoRect.left + left < viewportPadding) {
+          left = viewportPadding - flagInfoRect.left;
+        }
+      } else {
+        // Not enough space on either side, position to fit within bounds
+        const idealLeft = -(tooltipWidth / 2) + flagInfoRect.width / 2;
+        let finalLeft = idealLeft;
+
+        const tooltipLeftInViewport = flagInfoRect.left + idealLeft;
+        const tooltipRightInViewport = tooltipLeftInViewport + tooltipWidth;
+
+        // Adjust if it overflows on the right (with padding and container bounds)
+        if (tooltipRightInViewport > effectiveRightBound) {
+          finalLeft = effectiveRightBound - flagInfoRect.left - tooltipWidth;
+        }
+
+        // Adjust if it overflows on the left (with padding)
+        if (flagInfoRect.left + finalLeft < viewportPadding) {
+          finalLeft = viewportPadding - flagInfoRect.left;
+        }
+
+        // Final safety check: ensure it's within bounds
+        const finalTooltipLeftInViewport = flagInfoRect.left + finalLeft;
+        const finalTooltipRightInViewport = finalTooltipLeftInViewport + tooltipWidth;
+
+        if (finalTooltipLeftInViewport < viewportPadding) {
+          finalLeft = viewportPadding - flagInfoRect.left;
+        } else if (finalTooltipRightInViewport > effectiveRightBound) {
+          finalLeft = effectiveRightBound - flagInfoRect.left - tooltipWidth;
+        }
+
+        left = finalLeft;
+        right = undefined;
+      }
+
+      // Check vertical positioning
+      // Use container bounds or viewport, whichever is smaller for bottom calculation
+      const effectiveBottomBound = tableContainerRect
+        ? Math.min(containerBottom, viewportHeight)
+        : viewportHeight;
+      const spaceBelow = effectiveBottomBound - flagInfoRect.bottom;
+      const spaceAbove = flagInfoRect.top;
+
+      if (spaceBelow >= tooltipHeight + viewportPadding) {
+        // Enough space below within container/viewport, position normally
+        top = '100%';
+        transform = '';
+      } else if (spaceAbove >= tooltipHeight + viewportPadding) {
+        // Not enough space below, position above
+        top = 'unset';
+        bottom = '100%';
+      } else {
+        // Not enough space above or below, position in available space
+        if (spaceBelow > spaceAbove) {
+          // More space below, position there but adjust to fit
+          top = '100%';
+          const maxHeight = Math.max(0, spaceBelow - viewportPadding);
+          if (tooltipHeight > maxHeight) {
+            transform = `translateY(-${tooltipHeight - maxHeight}px)`;
+          } else {
+            transform = '';
+          }
+        } else {
+          // More space above, position there but adjust to fit
+          top = 'auto';
+          const maxHeight = Math.max(0, spaceAbove - viewportPadding);
+          if (tooltipHeight > maxHeight) {
+            transform = `translateY(-${Math.max(0, tooltipHeight - maxHeight)}px)`;
+          } else {
+            transform = 'translateY(-100%)';
+          }
+        }
+      }
+
+      this.tooltipStyles[employeeId] = {
+        left: left !== undefined ? `${left}px` : undefined,
+        right: right,
+        top: top,
+        transform: transform,
+        bottom: bottom,
+      };
+    }, 0);
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.logger.info('Page changed to:', page);
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.logger.info('Page size changed to:', size);
+  }
+
+  onSelectChange(value: string | string[]) {
+    this.selectedOption = value;
+    this.logger.info('Selected option:', value);
+    this.loadEmployees();
+  }
+
+  clearSelection() {
+    this.selectedOption = '';
+    this.logger.info('Selection cleared');
+  }
+
+  onSearch(query: string) {
+    this.lastQuery = query;
+    this.logger.info('Search query:', query);
+  }
+
+  onDebouncedSearch(query: string) {
+    this.lastDebounced = query;
+    this.logger.info('Debounced search query:', query);
+    this.searchQuery = query.trim();
+    this.loadEmployees();
+  }
+
+  handlePageChange(page: number) {
+    this.currentPage = page;
+    this.logger.info('Page changed to:', page);
+  }
+
+  getCurrentPageData() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.paginatedRows.slice(startIndex, endIndex);
+  }
+}
+
