@@ -1,0 +1,104 @@
+<div class="survey-form-wrap d-flex justify-content-center w-100">
+  <div class="survey-container">
+    <div
+      class="d-flex flex-column flex-lg-row justify-content-between align-lg-items-center header-section p-sm-0 p-2"
+    >
+      <!-- Title -->
+      <div class="form-heading mb-3 mb-lg-0">Create New Survey</div>
+      <!-- Right side section -->
+      <div class="d-flex flex-column flex-sm-row flex-wrap align-items-center">
+        <span class="survey-information me-sm-4 mb-2 mb-sm-0">
+          * This Survey Is For Coaches Only
+        </span>
+        <div class="d-flex justify-content-center flex-wrap gap-2">
+          <button class="cancel-btn">Preview</button> <button class="cancel-btn">Cancel</button>
+          <button class="publish-btn">Publish</button>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="form-heading">Create New Survey</div> -->
+    <form class="survey-form" [formGroup]="surveyForm">
+      <div class="row g-3">
+        <div class="col-lg-4 col-md-6 col-12">
+          <!-- select surevey Type -->
+          <label for="surveyType" class="form-label">Select Survey Type</label>
+          <tvsm-select
+            #surveyType
+            id="surveyType"
+            [options]="survey_type"
+            (selectionChange)="onSelectChange($event)"
+          >
+          </tvsm-select>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12">
+          <!-- select coach grp -->
+          <label for="coach_group" class="form-label">Select Coach Group</label>
+          <tvsm-dropdown
+            [options]="coach_group"
+            placeholder="Select"
+            [searchable]="true"
+            [multiple]="true"
+            id="coach_group"
+            [showCheckboxes]="true"
+            [filterIcon]="false"
+            searchPlaceholder="Search"
+            [searchIconContent]="searchIcon"
+            [arrowIconContent]="arrowIcon"
+          ></tvsm-dropdown>
+        </div>
+      </div>
+      <div>
+        <!-- survey description -->
+        <label for="description" class="form-label">Survey Description</label>
+        <tvsm-textarea maxlength="250" name="description"> </tvsm-textarea>
+      </div>
+      <div class="d-flex column-gap-5 flex-wrap">
+        <div class="mb-4">
+          <!-- due date -->
+          <label class="form-label d-block">Due Date</label>
+          <tvsm-custom-datefield
+            placeholder="DD-MM-YYYY"
+            displayFormat="dd-MM-yyyy"
+            (valueChange)="onDateChange($event)"
+            [minDate]="getTodayDateValue()"
+          ></tvsm-custom-datefield>
+        </div>
+
+        <div>
+          <!-- Email notification -->
+          <label class="form-label d-block">Email Notification</label>
+          <div class="form-check form-switch toggle-section mt-3">
+            <input
+              class="form-check-input pointer"
+              type="checkbox"
+              role="switch"
+              id="email-notification"
+              [checked]="isEmailEnabled"
+              (change)="toggleEmailNotification()"
+            />
+            @if (isEmailEnabled) {
+              <div class="d-flex column-gap-2 align-items-center">
+                <select
+                  id="timing"
+                  class="form-select custom-timing-select"
+                  formControlName="timing"
+                  (change)="onSelectChangeTiming($event)"
+                >
+                  <option value="" disabled selected>Select</option>
+                  <option *ngFor="let option of timing" [value]="option.label">
+                    {{ option.label }}
+                  </option>
+                </select>
+                <div class="timing-text">before survey starts</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      <!-- Add question button -->
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
